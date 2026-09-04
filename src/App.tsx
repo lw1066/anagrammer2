@@ -1,4 +1,4 @@
-import useSWR from 'swr';
+import useSWR from "swr";
 import { useCallback, useEffect, useState } from "react";
 import AnagrammerInput from "./components/AnagrammerInput";
 import AnagramDisplay from "./components/AnagramDisplay";
@@ -6,25 +6,32 @@ import FinalAnagram from "./components/FinalAnagram";
 import logo from "./assets/alpha-spag-round.jpg";
 import DictionaryCheck from "./components/DictionaryCheck";
 import { Helmet, HelmetProvider } from "react-helmet-async";
-import DictionaryDisplay from "./components/DictionaryDisplay";
+import { DictionaryDisplay } from "./components/DictionaryDisplay";
 import { GetDefinitionHelper } from "./services/GetDefinitionHelper";
 import { CheatDataInfiniteScroll } from "./components/CheatDataInfiniteScroll";
 import { CheatLookUpHelper } from "./services/CheatLookUpHelper";
 import { LocalCheatLookUpHelper } from "./services/LocalCheatLookUpHelper";
+import ErrorModal from "./components/ErrorModal";
 import Button from "./ui/Button";
 
-/**
- * Types for the Anagram state
- */
 interface AnaLetters {
   unordered: string[] | string;
   ld: string[] | string;
 }
 
+interface TrackedLetter {
+  id: number;
+  char: string;
+  isUsed: boolean;
+}
+
 function App() {
   const [error, setError] = useState<any>(null);
-  const [letters, setLetters] = useState<string[] | "">("");
-  const [anaLetters, setAnaLetters] = useState<AnaLetters>({ unordered: "", ld: "" });
+  const [letters, setLetters] = useState<TrackedLetter[]>([]);
+  const [anaLetters, setAnaLetters] = useState<AnaLetters>({
+    unordered: "",
+    ld: "",
+  });
   const [dictionaryDisplay, setDictionaryDisplay] = useState<any[]>([]);
   const [dictLook, setDictLook] = useState<boolean>(false);
   const [cheatData, setCheatData] = useState<any>(undefined);
@@ -32,11 +39,13 @@ function App() {
   const [dictSearchTerm, setDictSearchTerm] = useState<string | null>(null);
 
   // SWR Hook called cleanly at the top level
-  const { data: swrDictData, isLoading: swrDictLoading, error: swrDictError } = useSWR(
-    dictSearchTerm,
-    (word: string) => GetDefinitionHelper(word),
-    { revalidateOnFocus: false }
-  );
+  const {
+    data: swrDictData,
+    isLoading: swrDictLoading,
+    error: swrDictError,
+  } = useSWR(dictSearchTerm, (word: string) => GetDefinitionHelper(word), {
+    revalidateOnFocus: false,
+  });
 
   // Sync SWR result to dictionary display state
   useEffect(() => {
@@ -50,31 +59,83 @@ function App() {
     if (swrDictError) {
       setError({
         title: swrDictError.name || "Error",
-        message: swrDictError.message || "An error occurred fetching the definition.",
+        message:
+          swrDictError.message || "An error occurred fetching the definition.",
       });
     }
   }, [swrDictError]);
 
   const handleAnagrammiser = (inputLetters: string) => {
-    const letterArray = inputLetters.toLowerCase().split("");
+    const letterArray = inputLetters
+      .toLowerCase()
+      .split("")
+      .map((char, index) => ({
+        id: index, // Unique tracking marker for duplicates
+        char: char,
+        isUsed: false,
+      }));
+    // Update your letters state to accept this tracked object array layout
     setLetters(letterArray);
   };
 
-  const handleSubmitLetters = useCallback((letterData: string[]) => {
-    const usedLetters = new Set(letters);
+  const handleError = (title: string, message: string) => {
+    setError({ title, message });
+  };
 
-    for (const letter of letterData) {
-      if (usedLetters.has(letter)) {
-        usedLetters.delete(letter);
+  const handleSubmitLetters = useCallback(
+    (letterData: string[]) => {
+      const updatedLetters = letters.map((item) => ({
+        ...item,
+        isUsed: false,
+      }));
+
+      for (const letter of letterData) {
+        if (!letter) continue;
+
+        let match = updatedLetters.find(
+          (updatedLetter) =>
+            updatedLetter.char === letter && !updatedLetter.isUsed,
+        );
+
+        if (!match) {
+          match = updatedLetters.find(
+            (letter) => !letter.isUsed && letter.char === "?",
+          );
+        }
+
+        if (match) {
+          // Flip its flag to true so it moves to your word slot layout
+          match.isUsed = true;
+        } else {
+          // Edge case safeguard: User managed to submit a letter they don't possess
+          handleError(
+            "Mismatched Letters",
+            `You don't have enough instances of the letter "${letter.toUpperCase()}" available.`,
+          );
+          return;
+        }
       }
-    }
 
-    setAnaLetters({ unordered: Array.from(usedLetters), ld: letterData });
-  }, [letters]);
+      // 3. Save the full ledger back to your main state track
+      setLetters(updatedLetters);
+
+      // 4. Update your sub-state container for your rendering displays
+      // .filter tracks characters cleanly without colliding duplicates
+      const unorderedPool = updatedLetters
+        .filter((letter) => !letter.isUsed)
+        .map((letter) => letter.char);
+
+      setAnaLetters({
+        unordered: unorderedPool,
+        ld: letterData,
+      });
+    },
+    [letters, handleError],
+  );
 
   const handleResetAnagram = () => {
     setAnaLetters({ unordered: "", ld: "" });
-    setLetters("");
+    setLetters([]);
     setDictLook(false);
     setCheatData(undefined);
     setDictSearchTerm(null);
@@ -99,15 +160,18 @@ function App() {
   const handleRemoveCheatDisplay = () => {
     setCheatData(undefined);
   };
-  
-  const handleError = (title: string, message: string) => {
-    setError({ title, message });
-  };
 
-  const handleCheatLookUp = async (cheatWord: string[], currentLetters: string[]) => {
+  const handleCheatLookUp = async (
+    cheatWord: string[],
+    currentLetters: string[],
+  ) => {
     let data;
     if (currentLetters.length >= 15) {
-      data = await LocalCheatLookUpHelper(cheatWord, currentLetters, handleError);
+      data = await LocalCheatLookUpHelper(
+        cheatWord,
+        currentLetters,
+        handleError,
+      );
     } else {
       data = await CheatLookUpHelper(cheatWord, currentLetters, handleError);
     }
@@ -124,37 +188,29 @@ function App() {
         <link rel="canonical" href="http://anagrammiser.netlify.app" />
         <meta name="description" content="Anagram solver" />
       </Helmet>
-      
-      <header className="w-full flex flex-col md:flex-row justify-center items-center gap-6 p-6 md:p-10">
-        <img
-          src={logo}
-          alt="alphabetti spagetti soup"
-          className="w-32 h-32 md:w-82 md:h-82 rounded-full shadow-lg"
-        />
-        <div className="flex flex-col text-center md:text-left ">
-          <h1 className="text-2xl md:text-6xl font-bold ">
-            The Ana-gram-miser
-          </h1>
-          <h2 className="text-lg md:text-2xl font-bold text-[#ed800f] mt-1">
-            Solve anagrams — visualise, check words in a dictionary or cheat...
-          </h2>
-        </div>
-      </header>
 
-      {error && (
-        <div>
-          <div>
-            <div className="max-w-xl mx-auto mt-10 p-8 bg-orange-50 rounded-2xl shadow-sm text-center"/>
-            <header>
-              <h2>{error.title}</h2>
-            </header>
-            <div>
-              <p>{error.message}</p>
-            </div>
-            <Button onClick={() => setError(null)}>Okay</Button>
+      <header className="w-full max-w-4xl mx-auto p-4 md:p-10 flex flex-col gap-4 md:gap-6">
+        {/* TOP ROW: Title and Image grouped together on mobile */}
+        <div className="flex items-center justify-end md:justify-center md:flex-row gap-4 md:gap-8 w-full">
+          {/* IMAGE: Small on right for mobile, large on left for desktop */}
+          <img
+            src={logo}
+            alt="alphabetti spagetti soup"
+            className="w-20 h-20 sm:w-24 sm:h-24 md:w-64 md:h-64 rounded-full shadow-md md:shadow-lg object-cover shrink-0"
+          />
+
+          {/* TITLE: Left-aligned next to image on mobile, centers on desktop if needed */}
+          <div className="flex flex-col text-left md:text-left">
+            <h1 className="text-xl sm:text-2xl md:text-6xl font-bold tracking-tight text-gray-950">
+              The Ana-gram-miser
+            </h1>
+            <h2 className="text-xs sm:text-sm md:text-2xl font-semibold text-[#ed800f] mt-1 leading-relaxed">
+              Solve anagrams — visualise, check words in a dictionary or
+              cheat...
+            </h2>
           </div>
         </div>
-      )}
+      </header>
 
       {showWelcomeText && (
         <div className="max-w-xl mx-auto mt-10 p-8 bg-orange-50 rounded-2xl shadow-sm text-center">
@@ -170,14 +226,21 @@ function App() {
         </div>
       )}
 
-      {!letters && !showWelcomeText && anaLetters.unordered.length === 0 && (
-        <AnagrammerInput onAnagrammise={handleAnagrammiser} onError={handleError} />
-      )}
-      
+      {/* {!letters && !showWelcomeText && anaLetters.unordered.length === 0 && ( */}
+      <AnagrammerInput
+        onAnagrammise={handleAnagrammiser}
+        onError={handleError}
+      />
+      {/* )} */}
+
       {letters && anaLetters.unordered.length === 0 && (
-        <AnagramDisplay letters={letters} onLetterSubmit={handleSubmitLetters} onError={handleError} />
+        <AnagramDisplay
+          letters={letters.map((item) => item.char)}
+          onLetterSubmit={handleSubmitLetters}
+          onError={handleError}
+        />
       )}
-      
+
       {letters && (
         <FinalAnagram
           anaLetters={anaLetters}
@@ -185,11 +248,16 @@ function App() {
           resetAnaLetters={handleResetAnagramLetters}
           dictLookUp={() => setDictLook(true)}
           cheatLookUp={handleCheatLookUp}
-          letters={letters}
+          letters={letters.map((letter) => letter.char)}
         />
       )}
-      
-      {dictLook && <DictionaryCheck onDictLookUp={handleDictLookUp} onError={handleError} />}
+
+      {dictLook && (
+        <DictionaryCheck
+          onDictLookUp={handleDictLookUp}
+          onError={handleError}
+        />
+      )}
 
       {swrDictLoading && (
         <div className="flex flex-col items-center justify-center p-8 space-y-3">
@@ -199,15 +267,26 @@ function App() {
           </p>
         </div>
       )}
-      
+
       {dictionaryDisplay.length > 0 && (
-        <DictionaryDisplay wordDisplay={dictionaryDisplay} onConfirm={handleRemoveDisplay} />
+        <DictionaryDisplay
+          wordDisplay={dictionaryDisplay}
+          onConfirm={handleRemoveDisplay}
+        />
       )}
-      
+
+      {error && (
+        <ErrorModal
+          title={error.title}
+          message={error.message}
+          onClose={() => setError(null)}
+        />
+      )}
+
       {cheatData && (
         <CheatDataInfiniteScroll
           cheatData={cheatData}
-          letters={letters as string[]}
+          letters={letters.map((letter) => letter.char)}
           onConfirm={handleRemoveCheatDisplay}
         />
       )}
