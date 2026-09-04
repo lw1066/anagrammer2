@@ -7,11 +7,7 @@ interface ErrorModalProps {
   onClose: () => void;
 }
 
-export default function ErrorModal({
-  title,
-  message,
-  onClose,
-}: ErrorModalProps) {
+export const ErrorModal = ({ title, message, onClose }: ErrorModalProps) => {
   useEffect(() => {
     document.body.style.overflow = "hidden";
 
@@ -62,4 +58,4 @@ export default function ErrorModal({
       </div>
     </div>
   );
-}
+};
