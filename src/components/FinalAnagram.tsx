@@ -8,7 +8,6 @@ interface FinalAnagramProps {
   };
   dictLookUp: () => void;
   cheatLookUp: (cheatWord: string[], currentLetters: string[]) => void;
-  resetAna: () => void;
   resetAnaLetters: () => void;
   letters: string[] | string;
 }
@@ -17,7 +16,6 @@ export const FinalAnagram = ({
   anaLetters,
   dictLookUp,
   cheatLookUp,
-  resetAna,
   resetAnaLetters,
   letters,
 }: FinalAnagramProps) => {
@@ -113,13 +111,6 @@ export const FinalAnagram = ({
             type="button"
           >
             Back
-          </Button>
-          <Button
-            className="bg-red-500 hover:bg-red-700"
-            onClick={resetAna}
-            type="button"
-          >
-            Restart
           </Button>
         </div>
       </div>

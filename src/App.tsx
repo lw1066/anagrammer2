@@ -252,8 +252,14 @@ function App() {
       {showWelcomeText && (
         <div className="max-w-xl mx-auto mt-10 p-8 bg-orange-50 rounded-2xl shadow-sm text-center">
           <div className="space-y-4">
-            <p className="font-bold">Enter your letters to get started.</p>
-            <p>Enter ? for each missing letter.</p>
+            <p className="font-bold">
+              Hello, if you need anagram help you're in the right place.
+            </p>
+            <p>
+              You can look up words in the dictionary, visualise your anagram or
+              get us to do the work by finding all the anagrams. You don't even
+              need to know all the letters - just use ? for any unknown ones...
+            </p>
             <div className="pt-4 hover:pointer flex justify-center">
               <Button onClick={() => setShowWelcomeText(false)}>
                 Let's Go
@@ -275,6 +281,7 @@ function App() {
       {letters.length > 0 && anaLetters.unordered.length === 0 && (
         <AnagramDisplay
           letters={letters.map((item) => item.char)}
+          handleResetAnagram={handleResetAnagram}
           onLetterSubmit={handleSubmitLetters}
           onError={handleError}
         />
@@ -283,7 +290,6 @@ function App() {
       {letters.length > 0 && !dictLook && (
         <FinalAnagram
           anaLetters={anaLetters}
-          resetAna={handleResetAnagram}
           resetAnaLetters={handleResetAnagramLetters}
           dictLookUp={() => setDictLook(true)}
           cheatLookUp={handleCheatLookUp}

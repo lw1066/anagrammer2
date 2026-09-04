@@ -90,8 +90,6 @@ export const CheatDataInfiniteScroll = ({
             {visibleItems.map((item, index) => {
               const isExpanded = expandedDefinitions.has(index);
               const hasMoreThanOne = item.definitions.length > 1;
-
-              // CRUCIAL BUG FIX: Direct slice avoids mapping duplication loops entirely!
               const displayedDefinitions = isExpanded
                 ? item.definitions
                 : item.definitions.slice(0, 1);
@@ -124,9 +122,28 @@ export const CheatDataInfiniteScroll = ({
 
                   {/* Toggle buttons cleanly extracted from list tracking wrappers */}
                   {hasMoreThanOne && (
-                    <button
+                    <Button
                       onClick={() => toggleDefinition(index)}
-                      className="text-[#ed800f] hover:text-[#d4700b] text-xs font-bold mt-1 pl-2 transition-colors cursor-pointer flex items-center gap-1 focus:outline-none"
+                      className="bg-transparent!
+                      border-0!
+                      shadow-none!
+                      p-0!
+                      rounded-none!
+                      text-[#ed800f]!
+                      hover:text-[#d4700b]
+                      text-xs
+                      font-bold
+                      mt-1
+                      pl-2
+                      transition-colors
+                      cursor-pointer
+                      flex
+                      items-center
+                      gap-1
+                      focus:outline-none
+                      focus-visible:ring-1
+                      focus-visible:ring-[#ed800f]
+                      focus-visible:ring-offset-1   "
                     >
                       {isExpanded ? (
                         <>
@@ -149,9 +166,22 @@ export const CheatDataInfiniteScroll = ({
                         <>
                           Show {item.definitions.length - 1} more definition
                           {item.definitions.length - 1 === 1 ? "" : "s"}
+                          <svg
+                            className="w-3 h-3"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
                         </>
                       )}
-                    </button>
+                    </Button>
                   )}
                 </li>
               );
@@ -160,9 +190,7 @@ export const CheatDataInfiniteScroll = ({
         </div>
 
         <footer className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end items-center gap-3">
-          {showLoadMoreButton && (
-            <Button onClick={loadMoreItems}>Load More</Button>
-          )}
+          {showLoadMoreButton && <Button onClick={loadMoreItems}>More</Button>}
           <Button
             className="bg-red-500 hover:bg-red-700 transition-colors"
             onClick={onConfirm}

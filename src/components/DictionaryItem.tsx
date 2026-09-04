@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { DefinitionDetail } from "../services/GetDefinitionHelper";
+import Button from "../ui/Button";
 
 interface DictionaryItemProps {
   pos: string;
@@ -17,12 +18,10 @@ export const DictionaryItem: React.FC<DictionaryItemProps> = ({
 
   return (
     <li className="mb-6 p-4 border border-orange-100 rounded-xl bg-orange-50/30">
-      {/* Part of Speech Badge Heading */}
       <h3 className="text-sm font-bold uppercase tracking-wider text-[#ed800f] mb-2">
         {pos}
       </h3>
 
-      {/* Definitions Sub-List */}
       <ol className="list-decimal pl-5 space-y-2 text-gray-700">
         {displayedDefinitions.map((def, idx) => (
           <li key={idx} className="leading-relaxed">
@@ -31,11 +30,29 @@ export const DictionaryItem: React.FC<DictionaryItemProps> = ({
         ))}
       </ol>
 
-      {/* Toggle Button shown ONLY if there are extra definitions hidden */}
       {hasMoreThanOne && (
-        <button
+        <Button
           onClick={() => setShowAll(!showAll)}
-          className="mt-3 text-xs font-bold text-[#ed800f] hover:text-[#d4700b] transition-colors focus:outline-none flex items-center gap-1"
+          className="bg-transparent!
+                      border-0!
+                      shadow-none!
+                      p-0!
+                      rounded-none!
+                      text-[#ed800f]!
+                      hover:text-[#d4700b]
+                      text-xs
+                      font-bold
+                      mt-1
+                      pl-2
+                      transition-colors
+                      cursor-pointer
+                      flex
+                      items-center
+                      gap-1
+                      focus:outline-none
+                      focus-visible:ring-1
+                      focus-visible:ring-[#ed800f]
+                      focus-visible:ring-offset-1   "
         >
           {showAll ? (
             <>
@@ -56,7 +73,8 @@ export const DictionaryItem: React.FC<DictionaryItemProps> = ({
             </>
           ) : (
             <>
-              More Definitions ({definitions.length - 1} hidden)
+              Show {definitions.length - 1} more definition
+              {definitions.length - 1 === 1 ? "" : "s"}
               <svg
                 className="w-3 h-3"
                 fill="none"
@@ -72,7 +90,7 @@ export const DictionaryItem: React.FC<DictionaryItemProps> = ({
               </svg>
             </>
           )}
-        </button>
+        </Button>
       )}
     </li>
   );

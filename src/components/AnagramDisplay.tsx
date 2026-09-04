@@ -1,14 +1,16 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Button from "../ui/Button";
 
 interface AnagramDisplayProps {
   letters: string[];
+  handleResetAnagram: () => void;
   onError: (title: string, message: string) => void;
   onLetterSubmit: (list: string[]) => void;
 }
 
 export const AnagramDisplay = ({
   letters,
+  handleResetAnagram,
   onError,
   onLetterSubmit,
 }: AnagramDisplayProps) => {
@@ -16,41 +18,88 @@ export const AnagramDisplay = ({
     Array(letters.length).fill(""),
   );
 
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   if (!Array.isArray(letters)) {
     return null;
   }
 
   const letterHandler = (index: number, value: string) => {
+    const letter = value.toLowerCase().trim();
+
+    if (letter === "") {
+      const updatedLetters = [...userLetters];
+      updatedLetters[index] = "";
+
+      setUserLetters(updatedLetters);
+      return;
+    }
+
+    // Don't allow unknown letters
+    if (letter === "?") {
+      onError("Only include known letters!", "Don't add unknowns - ?");
+      return;
+    }
+
+    // Count how many times this letter exists in the original anagram
+    const availableCount = letters.filter(
+      (item) => item.toLowerCase() === letter,
+    ).length;
+
+    // Count how many times this letter is already being used,
+    // excluding the input currently being edited
+    const usedCount = userLetters.filter(
+      (item, currentIndex) => currentIndex !== index && item === letter,
+    ).length;
+
+    // Letter doesn't exist, or we've used it too many times
+    if (availableCount === 0 || usedCount >= availableCount) {
+      onError(
+        "Wrong letters!",
+        "Please check the letters are in your original anagram",
+      );
+      return;
+    }
+
     const updatedLetters = [...userLetters];
-    updatedLetters[index] = value.toLowerCase().trim();
+    updatedLetters[index] = letter;
 
     setUserLetters(updatedLetters);
+
+    // Automatically move to the next input
+    if (index < letters.length - 1) {
+      inputRefs.current[index + 1]?.focus();
+    }
   };
 
-  const submitHandler = () => {
-    const data = letters.map((item) => item.toLowerCase());
+  const keyHandler = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
 
-    for (const letter of userLetters) {
-      if (letter === "?") {
-        onError("Only include known letters!", "Don't add unknowns - ?");
-        return;
-      }
-
-      const index = data.indexOf(letter);
-
-      if (index === -1 && letter !== "") {
-        onError(
-          "Wrong letters!",
-          "Please check the letters are in your original anagram",
-        );
-        return;
-      }
-
-      if (index !== -1) {
-        data.splice(index, 1);
+      if (index < letters.length - 1) {
+        inputRefs.current[index + 1]?.focus();
       }
     }
 
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+
+      if (index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
+    }
+
+    if (event.key === "Backspace" && !userLetters[index]) {
+      if (index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
+    }
+  };
+
+  const submitHandler = () => {
     onLetterSubmit(userLetters);
   };
 
@@ -65,11 +114,15 @@ export const AnagramDisplay = ({
       <div className="flex flex-wrap justify-center gap-2">
         {letters.map((_, index) => (
           <input
+            ref={(element) => {
+              inputRefs.current[index] = element;
+            }}
             type="text"
             id={index.toString()}
             key={index}
             value={userLetters[index]}
             onChange={(event) => letterHandler(index, event.target.value)}
+            onKeyDown={(event) => keyHandler(event, index)}
             size={1}
             maxLength={1}
             style={{ flexBasis: inputWidthPercentage }}
@@ -78,9 +131,16 @@ export const AnagramDisplay = ({
         ))}
       </div>
 
-      <div className="flex justify-center pt-2">
+      <div className="flex justify-center gap-2 pt-2">
         <Button type="button" onClick={submitHandler}>
           Let's go
+        </Button>
+        <Button
+          className="bg-red-500 hover:bg-red-700"
+          type="button"
+          onClick={handleResetAnagram}
+        >
+          Back
         </Button>
       </div>
     </div>

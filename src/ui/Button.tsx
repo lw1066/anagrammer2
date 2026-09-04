@@ -15,7 +15,7 @@ export const Button = ({ type, onClick, children, className }: ButtonProps) => {
 
     const timer = setTimeout(() => {
       setIsActiveRing(false);
-    }, 1000);
+    }, 300);
 
     return () => clearTimeout(timer);
   }, [isActiveRing]);
@@ -29,7 +29,7 @@ export const Button = ({ type, onClick, children, className }: ButtonProps) => {
   };
 
   const baseClasses =
-    "inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-[#ed800f] hover:bg-orange-600 focus:outline-none transition-all duration-200 ease-in-out";
+    "inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-[#ed800f] hover:bg-orange-600 transition-all duration-200 ease-in-out focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-400 focus-visible:ring-offset-2 ";
 
   const temporaryRingClasses = isActiveRing
     ? "ring-2 ring-offset-2 ring-[#ed800f]"
