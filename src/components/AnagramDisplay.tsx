@@ -1,5 +1,4 @@
-import React from "react";
-import type { FormEvent } from "react";
+import { useState } from "react";
 import Button from "../ui/Button";
 
 interface AnagramDisplayProps {
@@ -8,67 +7,69 @@ interface AnagramDisplayProps {
   onLetterSubmit: (list: string[]) => void;
 }
 
-const AnagramDisplay: React.FC<AnagramDisplayProps> = ({
+export const AnagramDisplay = ({
   letters,
   onError,
   onLetterSubmit,
-}) => {
+}: AnagramDisplayProps) => {
+  const [userLetters, setUserLetters] = useState<string[]>(
+    Array(letters.length).fill(""),
+  );
+
   if (!Array.isArray(letters)) {
     return null;
   }
 
-  const letterHandler = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const letterHandler = (index: number, value: string) => {
+    const updatedLetters = [...userLetters];
+    updatedLetters[index] = value.toLowerCase().trim();
 
-    // Extract all input elements within the form
-    const form = event.currentTarget;
-    const inputElements = form.querySelectorAll('input[type="text"]');
+    setUserLetters(updatedLetters);
+  };
 
-    // Map over the input elements to extract their values
-    const list = Array.from(inputElements).map((input) =>
-      (input as HTMLInputElement).value.toLowerCase().trim()
-    );
-
-    // Validate input
+  const submitHandler = () => {
     const data = letters.map((item) => item.toLowerCase());
-    for (let i = 0; i < list.length; i++) {
-      if (list[i] === "?") {
+
+    for (const letter of userLetters) {
+      if (letter === "?") {
         onError("Only include known letters!", "Don't add unknowns - ?");
         return;
       }
 
-      const index = data.indexOf(list[i]);
-      if (index === -1 && list[i] !== "") {
+      const index = data.indexOf(letter);
+
+      if (index === -1 && letter !== "") {
         onError(
           "Wrong letters!",
-          "Please check the letters are in your original anagram"
+          "Please check the letters are in your original anagram",
         );
         return;
       }
 
       if (index !== -1) {
-        data.splice(index, 1); // Remove the letter to prevent further matches
+        data.splice(index, 1);
       }
     }
 
-    onLetterSubmit(list);
+    onLetterSubmit(userLetters);
   };
 
-  // Calculate flex-basis based on the number of letters for alignment
   const inputWidthPercentage = `${100 / letters.length - 3}%`;
 
   return (
-    <form onSubmit={letterHandler} className="flex flex-col gap-6 max-w-2xl mx-auto mt-8 p-8 bg-white shadow-sm border border-slate-200 rounded-2xl">
+    <div className="flex flex-col gap-6 max-w-2xl mx-auto mt-8 p-8 bg-white shadow-sm border border-slate-200 rounded-2xl">
       <p className="bg-white/95 rounded-lg p-3 text-center text-[#ed800f] font-medium border border-orange-100 shadow-sm">
         Position any letters ({letters.join(", ")})
       </p>
-      
+
       <div className="flex flex-wrap justify-center gap-2">
         {letters.map((_, index) => (
           <input
             type="text"
             id={index.toString()}
             key={index}
+            value={userLetters[index]}
+            onChange={(event) => letterHandler(index, event.target.value)}
             size={1}
             maxLength={1}
             style={{ flexBasis: inputWidthPercentage }}
@@ -76,12 +77,12 @@ const AnagramDisplay: React.FC<AnagramDisplayProps> = ({
           />
         ))}
       </div>
-      
+
       <div className="flex justify-center pt-2">
-        <Button type="submit">Let's go</Button>
+        <Button type="button" onClick={submitHandler}>
+          Let's go
+        </Button>
       </div>
-    </form>
+    </div>
   );
 };
-
-export default AnagramDisplay;
