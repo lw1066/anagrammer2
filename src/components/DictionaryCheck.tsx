@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
-import Button from '../ui/Button';
+import { useState } from "react";
+import Button from "../ui/Button";
 
 interface DictionaryCheckProps {
-  onDictLookUp: (word: string, errHandler: (title: string, msg: string) => void) => void;
+  onDictLookUp: (
+    word: string,
+    errHandler: (title: string, msg: string) => void,
+  ) => void;
   onError: (title: string, message: string) => void;
+  onClose: () => void;
 }
 
-const DictionaryCheck: React.FC<DictionaryCheckProps> = ({onError, onDictLookUp}) => {
-  const [letters, setLetters] = useState('');
+export const DictionaryCheck = ({
+  onError,
+  onDictLookUp,
+  onClose,
+}: DictionaryCheckProps) => {
+  const [letters, setLetters] = useState("");
 
   const changeHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLetters(event.target.value);
@@ -17,31 +25,36 @@ const DictionaryCheck: React.FC<DictionaryCheckProps> = ({onError, onDictLookUp}
     event.preventDefault();
     const checkRegex = /^[A-Za-z]+$/;
     if (!letters) {
-      onError('No letters!', 'Put a word in mate');
+      onError("No letters!", "Put a word in mate");
       return;
     }
     if (!letters.match(checkRegex)) {
-      onError('Not letters!', "You can't check stuff that ain't letters");
+      onError("Not letters!", "You can't check stuff that ain't letters");
       return;
     }
     onDictLookUp(letters, onError);
   };
 
   return (
-    <form onSubmit={dictCheckHandler} className="flex flex-col items-center max-w-xl mx-auto my-8 p-6 bg-orange-50 rounded-lg shadow-sm">
-      <label className="text-lg font-bold text-gray-700 mb-4">What word do you want to dictionary check?</label>
+    <form
+      onSubmit={dictCheckHandler}
+      className="flex flex-col items-center max-w-xl mx-auto my-8 p-6 bg-orange-50 rounded-lg shadow-sm"
+    >
+      <label className="text-lg font-bold text-gray-700 mb-4">
+        What word do you want to dictionary check?
+      </label>
       <input
         onChange={changeHandler}
         value={letters}
         type="text"
         className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#ed800f] text-center uppercase tracking-widest mb-6"
       />
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-3">
         <Button type="submit">Check it out</Button>
+        <Button type="button" onClick={onClose}>
+          Close
+        </Button>
       </div>
     </form>
   );
 };
-
-export default DictionaryCheck;
-

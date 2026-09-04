@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Button from "../ui/Button";
 
 interface FinalAnagramProps {
@@ -13,24 +13,24 @@ interface FinalAnagramProps {
   letters: string[] | string;
 }
 
-const FinalAnagram: React.FC<FinalAnagramProps> = ({
+export const FinalAnagram = ({
   anaLetters,
   dictLookUp,
   cheatLookUp,
   resetAna,
   resetAnaLetters,
   letters,
-}) => {
+}: FinalAnagramProps) => {
   const initialAna = Array.isArray(anaLetters.unordered)
     ? [...anaLetters.unordered]
-    : typeof anaLetters.unordered === 'string'
+    : typeof anaLetters.unordered === "string"
       ? anaLetters.unordered.split("")
       : [];
-    
+
   const [ana, setAna] = useState<string[]>(initialAna);
   const letterData = Array.isArray(anaLetters.ld)
     ? anaLetters.ld
-    : typeof anaLetters.ld === 'string'
+    : typeof anaLetters.ld === "string"
       ? anaLetters.ld.split("")
       : [];
 
@@ -38,9 +38,9 @@ const FinalAnagram: React.FC<FinalAnagramProps> = ({
     setAna(
       Array.isArray(anaLetters.unordered)
         ? [...anaLetters.unordered]
-        : typeof anaLetters.unordered === 'string'
+        : typeof anaLetters.unordered === "string"
           ? anaLetters.unordered.split("")
-          : []
+          : [],
     );
   }, [anaLetters.unordered]);
 
@@ -80,17 +80,15 @@ const FinalAnagram: React.FC<FinalAnagramProps> = ({
               >
                 _
               </span>
-            )
+            ),
           )}
         </p>
-        <p className="uppercase text-2xl text-center mx-2 tracking-[0.75rem] break-words text-[#ed800f] font-bold">
+        <p className="uppercase text-2xl text-center mx-2 tracking-[0.75rem] wrap-break-word text-[#ed800f] font-bold">
           {ana.join("")}
         </p>
       </div>
 
-      <div
-        className="flex flex-col justify-center items-center rounded bg-cover bg-center w-full max-w-md h-32 p-4 shadow-md bg-[url('/alpha-spag.jpg')] bg-orange-100"
-      >
+      <div className="flex flex-col justify-center items-center rounded bg-cover bg-center w-full max-w-md h-32 p-4 shadow-md bg-[url('/alpha-spag.jpg')] bg-orange-100">
         <div className="flex flex-wrap justify-center gap-4">
           <Button onClick={mixTheLetters} type="button">
             Mix
@@ -99,20 +97,25 @@ const FinalAnagram: React.FC<FinalAnagramProps> = ({
             Dictionary
           </Button>
           <Button
-            onClick={() => cheatLookUp(letterData as string[], Array.isArray(letters) ? letters : letters.split(""))}
+            onClick={() =>
+              cheatLookUp(
+                letterData as string[],
+                Array.isArray(letters) ? letters : letters.split(""),
+              )
+            }
             type="button"
           >
             Cheat!
           </Button>
           <Button
-            className="!bg-red-500 hover:!bg-red-700"
+            className="bg-red-500 hover:bg-red-700"
             onClick={resetAnaLetters}
             type="button"
           >
             Back
           </Button>
           <Button
-            className="!bg-red-500 hover:!bg-red-700"
+            className="bg-red-500 hover:bg-red-700"
             onClick={resetAna}
             type="button"
           >
@@ -123,6 +126,3 @@ const FinalAnagram: React.FC<FinalAnagramProps> = ({
     </div>
   );
 };
-
-export default FinalAnagram;
-
