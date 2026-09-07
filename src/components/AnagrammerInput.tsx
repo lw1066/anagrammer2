@@ -7,7 +7,10 @@ interface AnagrammerInputProps {
   onAnagrammise: (letters: string) => void;
 }
 
-const AnagrammerInput: React.FC<AnagrammerInputProps> = ({ onError, onAnagrammise }) => {
+const AnagrammerInput: React.FC<AnagrammerInputProps> = ({
+  onError,
+  onAnagrammise,
+}) => {
   const [letters, setLetters] = useState<string>("");
 
   const changeHandler = (event: ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +30,7 @@ const AnagrammerInput: React.FC<AnagrammerInputProps> = ({ onError, onAnagrammis
     if (!trimmedLetters.match(checkRegex)) {
       onError(
         "Invalid characters!",
-        "You can only use letters and ? (for unknown letters)"
+        "You can only use letters and ? (for unknown letters)",
       );
       return;
     }
@@ -44,10 +47,11 @@ const AnagrammerInput: React.FC<AnagrammerInputProps> = ({ onError, onAnagrammis
       onSubmit={anagrammiseHandler}
       className="flex flex-col gap-4 max-w-md mx-auto mt-8 p-6 bg-orange-50 shadow-sm rounded-2xl"
     >
-      <label className="text-sm font-semibold text-slate-700">
-        Type in your letters (? for unknown)
+      <label htmlFor="letters" className="text-sm font-semibold text-slate-700">
+        Enter letters (? for unknown)
       </label>
       <input
+        id="letters"
         onChange={changeHandler}
         value={letters}
         type="text"

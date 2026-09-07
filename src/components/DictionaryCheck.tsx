@@ -40,10 +40,14 @@ export const DictionaryCheck = ({
       onSubmit={dictCheckHandler}
       className="flex flex-col items-center max-w-7/8 mx-auto my-8 p-6 bg-orange-50 rounded-lg shadow-sm"
     >
-      <label className="text-lg font-bold text-gray-700 mb-4">
-        What word do you want to dictionary check?
+      <label
+        htmlFor="target_word"
+        className="text-lg font-bold text-gray-700 mb-4"
+      >
+        Enter word to dictionary check?
       </label>
       <input
+        id="target_word"
         onChange={changeHandler}
         value={letters}
         type="text"
