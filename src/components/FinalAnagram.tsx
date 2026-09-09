@@ -60,60 +60,73 @@ export const FinalAnagram = ({
   };
 
   return (
-    <div className="flex flex-col items-center max-w-2xl mx-auto my-8 space-y-6">
-      <div className="text-center w-full">
-        <p className="flex flex-wrap justify-center text-[#ed800f] mb-4">
-          {letterData.map((item, index) =>
-            item ? (
-              <span
-                className="uppercase text-2xl text-center mx-2 font-bold text-[#ed800f]"
-                key={index}
-              >
-                {item}
-              </span>
-            ) : (
-              <span
-                className="uppercase text-2xl text-center mx-2 font-bold text-[#ed800f]"
-                key={index}
-              >
-                _
-              </span>
-            ),
-          )}
-        </p>
-        <p className="uppercase text-2xl text-center mx-2 tracking-[0.75rem] wrap-break-word text-[#ed800f] font-bold">
-          {ana.join("")}
-        </p>
-      </div>
+    <section aria-labelledby="anagram-heading" className="text-center w-full">
+      <h2 id="anagram-heading" className="sr-only">
+        Anagram
+      </h2>
+      <div className="flex flex-col items-center max-w-2xl mx-auto my-8 space-y-6">
+        <div className="text-center w-full">
+          <p
+            aria-label="Available letters"
+            className="flex flex-wrap justify-center text-[#ed800f] mb-4"
+          >
+            {letterData.map((item, index) =>
+              item ? (
+                <span
+                  className="uppercase text-2xl text-center mx-2 font-bold text-[#ed800f]"
+                  key={index}
+                >
+                  {item}
+                </span>
+              ) : (
+                <span
+                  aria-label="unknown letter"
+                  className="uppercase text-2xl text-center mx-2 font-bold text-[#ed800f]"
+                  key={index}
+                >
+                  _
+                </span>
+              ),
+            )}
+          </p>
+          <p
+            aria-label="Current anagram"
+            aria-live="polite"
+            className="uppercase text-2xl text-center mx-2 tracking-[0.75rem] wrap-break-word text-[#ed800f] font-bold"
+          >
+            {ana.join("")}
+          </p>
+        </div>
 
-      <div className="flex flex-col justify-center items-center rounded bg-cover bg-center w-full max-w-md h-32 p-4 shadow-md bg-[url('/alpha-spag.jpg')] bg-orange-100">
-        <div className="flex flex-wrap justify-center gap-4">
-          <Button onClick={mixTheLetters} type="button">
-            Mix
-          </Button>
-          <Button onClick={dictLookUp} type="button">
-            Dictionary
-          </Button>
-          <Button
-            onClick={() =>
-              cheatLookUp(
-                letterData as string[],
-                Array.isArray(letters) ? letters : letters.split(""),
-              )
-            }
-            type="button"
-          >
-            Cheat!
-          </Button>
-          <Button
-            className="bg-red-500 hover:bg-red-700"
-            onClick={resetAnaLetters}
-            type="button"
-          >
-            Back
-          </Button>
+        <div className="flex flex-col justify-center items-center rounded bg-cover bg-center w-full max-w-md h-32 p-4 shadow-md bg-[url('/alpha-spag.jpg')] bg-orange-100">
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button onClick={mixTheLetters} type="button">
+              Mix
+            </Button>
+            <Button onClick={dictLookUp} type="button">
+              Dictionary
+            </Button>
+            <Button
+              onClick={() =>
+                cheatLookUp(
+                  letterData as string[],
+                  Array.isArray(letters) ? letters : letters.split(""),
+                )
+              }
+              type="button"
+            >
+              Cheat!
+            </Button>
+            <Button
+              className="bg-red-500 hover:bg-red-700"
+              onClick={resetAnaLetters}
+              type="button"
+            >
+              Back
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };

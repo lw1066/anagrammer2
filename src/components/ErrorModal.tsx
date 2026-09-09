@@ -18,13 +18,26 @@ export const ErrorModal = ({ title, message, onClose }: ErrorModalProps) => {
   }, []);
 
   return (
-    <FocusTrap>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      <FocusTrap
+        // turned off tabbable display check as causing jest errors
+        focusTrapOptions={{
+          tabbableOptions: {
+            displayCheck: "none",
+          },
+        }}
+      >
         <div
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-          onClick={onClose}
-        />
-        <div className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-center shadow-2xl transition-all border border-orange-100 animate-in fade-in zoom-in-95 duration-200">
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="error-modal-title"
+          className="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-center shadow-2xl transition-all border border-orange-100 animate-in fade-in zoom-in-95 duration-200"
+        >
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-500 mb-4">
             <svg
               className="h-6 w-6"
@@ -42,7 +55,12 @@ export const ErrorModal = ({ title, message, onClose }: ErrorModalProps) => {
           </div>
 
           <header className="mb-2">
-            <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+            <h2
+              id="error-modal-title"
+              className="text-xl font-bold text-gray-900"
+            >
+              {title}
+            </h2>
           </header>
 
           <div className="mb-6">
@@ -53,7 +71,7 @@ export const ErrorModal = ({ title, message, onClose }: ErrorModalProps) => {
             <Button onClick={onClose}>Got it</Button>
           </div>
         </div>
-      </div>
-    </FocusTrap>
+      </FocusTrap>
+    </div>
   );
 };

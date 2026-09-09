@@ -21,7 +21,7 @@ const AnagrammerInput: React.FC<AnagrammerInputProps> = ({
     event.preventDefault();
 
     const checkRegex = /^[A-Za-z?]+$/;
-    const trimmedLetters = letters.trim();
+    const trimmedLetters = letters.replace(/\s/g, "").trim();
 
     if (!trimmedLetters) {
       onError("No letters!", "Put some letters in to anagrammise");
