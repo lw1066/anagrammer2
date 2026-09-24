@@ -1,21 +1,21 @@
 import type { DefinitionDetail, DefinitionItem } from "./GetDefinitionHelper";
 
 export const CheatLookUpHelper = async (
-  cheatWord: string | string[],
-  letters: any[],
+  letterPositions: string | string[],
+  availableLetters: any[],
   errorHandler: (title: string, msg: string) => void,
 ): Promise<DefinitionItem[] | undefined> => {
-  const cheatWordArray = Array.isArray(cheatWord)
-    ? cheatWord
-    : cheatWord.split("");
+  const letterPositionsArray = Array.isArray(letterPositions)
+    ? letterPositions
+    : letterPositions.split("");
 
-  const pattern = cheatWordArray.map((letter) =>
+  const pattern = letterPositionsArray.map((letter) =>
     !letter || letter === "_" || letter === "?" ? "." : letter,
   );
   const regexPattern = pattern.join("");
   const regex = new RegExp(`^${regexPattern}$`, "i");
 
-  const cleanLetterStrings = letters.map((item) =>
+  const cleanLetterStrings = availableLetters.map((item) =>
     typeof item === "object" && item !== null ? item.char : item,
   );
 

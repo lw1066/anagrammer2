@@ -15,6 +15,7 @@ import { CheatDataInfiniteScroll } from "./components/CheatDataInfiniteScroll";
 import { CheatLookUpHelper } from "./services/CheatLookUpHelper";
 import { ErrorModal } from "./components/ErrorModal";
 import { Button } from "./ui/Button";
+import AiChatAssistant from "./components/AiChatAssistant";
 
 interface AnaLetters {
   unordered: string[] | string;
@@ -46,6 +47,12 @@ function App() {
   const [cheatData, setCheatData] = useState<DefinitionItem[] | undefined>(
     undefined,
   );
+  const [cheatPosFilter, setCheatPosFilter] = useState<string | null>(null);
+
+  const displayedCheatData = cheatPosFilter
+    ? cheatData?.filter((item) => item.pos === cheatPosFilter)
+    : cheatData;
+
   const [showWelcomeText, setShowWelcomeText] = useState<boolean>(true);
 
   const [dictSearchTerm, setDictSearchTerm] = useState<string | null>(null);
@@ -182,6 +189,7 @@ function App() {
     setCheatData(undefined);
     setDictSearchTerm(null);
     setCheatParams(null);
+    setCheatPosFilter(null);
   };
 
   const handleResetAnagramLetters = () => {
@@ -190,6 +198,27 @@ function App() {
     setCheatData(undefined);
     setDictSearchTerm(null);
     setCheatParams(null);
+    setCheatPosFilter(null);
+  };
+
+  const handleAiAnagram = (
+    availableLetters: string[],
+    letterPositions: string[],
+  ) => {
+    setShowWelcomeText(false);
+
+    const letterArray = availableLetters.map((char, index) => ({
+      id: index,
+      char,
+      isUsed: false,
+    }));
+
+    setLetters(letterArray);
+
+    setAnaLetters({
+      unordered: availableLetters,
+      ld: letterPositions,
+    });
   };
 
   const handleDictLookUp = (word: string) => {
@@ -206,6 +235,10 @@ function App() {
     setCheatParams(null);
   };
 
+  const handleAiCheatResults = (results: DefinitionItem[]) => {
+    setCheatData(results);
+  };
+
   const handleCheatLookUp = (cheatWord: string[], currentLetters: string[]) => {
     const wildcardCount = currentLetters.filter((char) => char === "?").length;
 
@@ -216,6 +249,7 @@ function App() {
       );
       return;
     }
+    setCheatPosFilter(null);
     setCheatParams(null);
     setCheatData(undefined);
     setCheatParams({ cheatWord, currentLetters });
@@ -331,13 +365,19 @@ function App() {
       )}
 
       {/* Condition to render cheat scroll when data is ready */}
-      {cheatData && (
+      {displayedCheatData && (
         <CheatDataInfiniteScroll
-          cheatData={cheatData}
+          cheatData={displayedCheatData}
           letters={letters.map((letter) => letter.char)}
           onConfirm={handleRemoveCheatDisplay}
         />
       )}
+      <AiChatAssistant
+        onCheatResults={handleAiCheatResults}
+        onPosFilter={setCheatPosFilter}
+        onReset={handleResetAnagram}
+        onAIAnagram={handleAiAnagram}
+      />
     </HelmetProvider>
   );
 }

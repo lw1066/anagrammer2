@@ -55,6 +55,7 @@ const AnagrammerInput: React.FC<AnagrammerInputProps> = ({
         onChange={changeHandler}
         value={letters}
         type="text"
+        autoCorrect="off"
         placeholder="e.g. a?ple"
         className="w-full px-4 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#ed800f] focus:border-transparent transition-all placeholder:text-slate-400"
       />
